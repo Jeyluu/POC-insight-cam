@@ -35,15 +35,37 @@ function Camera() {
       // Faire quelque chose avec l'image, par exemple, l'afficher dans une balise <img>
 
       setNewImage(imageDataUrl)
+
+      // Arrêter le flux vidéo
+      const stream = video.srcObject as MediaStream
+      stream.getTracks().forEach(function (track) {
+        track.stop()
+      })
     }
   }, [])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <video ref={videoRef} autoPlay playsInline />
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-      <button onClick={takePicture}>Prendre une photo</button>
-      {image && <img src={image}></img>}
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {image ? (
+        <>
+          <img src={image}></img>
+          <div style={{}}>
+            <button>Valider</button>
+            <button>Reprendre une photo</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <video ref={videoRef} autoPlay playsInline />
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
+          <button onClick={takePicture}>Prendre une photo</button>
+        </>
+      )}
     </div>
   )
 }
