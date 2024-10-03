@@ -1,48 +1,22 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import Webcam from 'react-webcam'
+
+const videoConstraints = {
+  width: 1280,
+  height: 720,
+  facingMode: 'user',
+}
 
 function Camera() {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [image, setNewImage] = useState<string | null>(null)
+  const webcamRef = useRef<Webcam>(null)
+  const [imageArray, setImageArray] = useState<string[]>([])
 
-  useEffect(() => {
-    // Demander l'accès à la caméra
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then(function (stream) {
-        // Afficher le flux vidéo dans un élément <video>
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          videoRef.current.play()
-        }
-      })
-      .catch(function (err) {
-        console.log(err.name + ': ' + err.message)
-      })
-  }, [])
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current?.getScreenshot()
 
-  const takePicture = useCallback(() => {
-    // Prendre une photo en utilisant un élément <canvas>
-    const canvas = canvasRef.current
-    const video = videoRef.current
-    if (canvas && video) {
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      canvas.getContext('2d')?.drawImage(video, 0, 0)
-      //Convertir l'image en données URL
-      const imageDataUrl = canvas.toDataURL('image/jpeg')
-
-      // Faire quelque chose avec l'image, par exemple, l'afficher dans une balise <img>
-
-      setNewImage(imageDataUrl)
-
-      // Arrêter le flux vidéo
-      const stream = video.srcObject as MediaStream
-      stream.getTracks().forEach(function (track) {
-        track.stop()
-      })
-    }
-  }, [])
+    if (imageSrc)
+      setImageArray((prev) => [...prev, prev.push(imageSrc).toString()])
+  }, [imageArray])
 
   return (
     <div
@@ -51,21 +25,28 @@ function Camera() {
         flexDirection: 'column',
       }}
     >
-      {image ? (
-        <>
-          <img src={image}></img>
-          <div style={{}}>
-            <button>Valider</button>
-            <button>Reprendre une photo</button>
-          </div>
-        </>
-      ) : (
-        <>
-          <video ref={videoRef} autoPlay playsInline />
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
-          <button onClick={takePicture}>Prendre une photo</button>
-        </>
-      )}
+      <Webcam
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        height={400}
+        width={400}
+        videoConstraints={videoConstraints}
+      />
+      <button onClick={capture}>Capture photo</button>
+
+      {imageArray.map((value, index) => {
+        console.log('image', value)
+        return value !== ' ' ? (
+          <img
+            key={`${value}-${index}`}
+            src={value.toString()}
+            alt={`${value}-${index}-image`}
+          />
+        ) : (
+          'Image Non disponible'
+        )
+      })}
     </div>
   )
 }
