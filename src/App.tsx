@@ -4,6 +4,10 @@ import './App.css'
 import Camera from './components/camera/Camera'
 
 function App() {
+  const toto = import.meta.env.USEAPI_TOKEN
+  console.log(toto)
+  const rootFaceSwap = 'https://api.useapi.net/v1/faceswap'
+
   return (
     <>
       <Camera />
