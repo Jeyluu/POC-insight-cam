@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
+import ids from './camera.module.css'
 
 const videoConstraints = {
   width: 1280,
@@ -9,13 +10,12 @@ const videoConstraints = {
 
 function Camera() {
   const webcamRef = useRef<Webcam>(null)
-  const [imageArray, setImageArray] = useState<string[]>([])
+  const [imageArray, setImageArray] = useState<string | null>(null)
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot()
 
-    if (imageSrc)
-      setImageArray((prev) => [...prev, prev.push(imageSrc).toString()])
+    if (imageSrc) setImageArray(imageSrc)
   }, [imageArray])
 
   return (
@@ -35,18 +35,17 @@ function Camera() {
       />
       <button onClick={capture}>Capture photo</button>
 
-      {imageArray.map((value, index) => {
-        console.log('image', value)
-        return value !== ' ' ? (
-          <img
-            key={`${value}-${index}`}
-            src={value.toString()}
-            alt={`${value}-${index}-image`}
-          />
+      <div className={ids['image-preview']}>
+        {imageArray !== null ? (
+          <img src={imageArray} alt={`${imageArray}--image`} />
         ) : (
           'Image Non disponible'
-        )
-      })}
+        )}
+        <div className={ids['image-preview-buttons']}>
+          <button onClick={capture}>Reprendre une photo</button>
+          <button onClick={capture}>Valider la photo</button>
+        </div>
+      </div>
     </div>
   )
 }
