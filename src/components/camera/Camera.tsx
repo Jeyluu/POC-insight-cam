@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
 import ids from './camera.module.css'
+import { saveid } from '../../io/faceSwapRequest'
 
 const videoConstraints = {
   width: 1280,
@@ -15,7 +16,11 @@ function Camera() {
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot()
 
-    if (imageSrc) setImageArray(imageSrc)
+    if (imageSrc) {
+       setImageArray(imageSrc)
+    }
+     
+
   }, [imageArray])
 
   return (
@@ -37,14 +42,24 @@ function Camera() {
 
       <div className={ids['image-preview']}>
         {imageArray !== null ? (
-          <img src={imageArray} alt={`${imageArray}--image`} />
+          <>
+        <img src={imageArray} alt={`${imageArray}--image`} />
+          <div className={ids['image-preview-buttons']}>
+          <button onClick={capture}>Reprendre une photo</button>
+          <button onClick={() => {
+            /** VOir la requête qui tombe en error
+             * Piste : peut être faire un post du faceswap account ?
+             */
+            saveid('newImageTest',imageArray,'1291837195484659734').catch((error) => {
+              console.error(error)
+            })
+          } 
+      }>
+        Valider la photo</button></div></>
+          
         ) : (
           'Image Non disponible'
         )}
-        <div className={ids['image-preview-buttons']}>
-          <button onClick={capture}>Reprendre une photo</button>
-          <button onClick={capture}>Valider la photo</button>
-        </div>
       </div>
     </div>
   )
